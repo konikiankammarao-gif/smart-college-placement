@@ -5,7 +5,8 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon server.js",
+    "dev": "node server.js",
+    "build": "echo 'Backend build ready'",
     "seed": "node utils/seeder.js"
   },
   "keywords": ["placement", "mern", "college"],
