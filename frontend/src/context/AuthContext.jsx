@@ -4,10 +4,16 @@ import api from '../services/api';
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(() => {
-    const savedUser = localStorage.getItem('user');
-    return savedUser ? JSON.parse(savedUser) : null;
-  });
+  const getStoredUser = () => {
+    try {
+      const savedUser = localStorage.getItem('user');
+      return savedUser ? JSON.parse(savedUser) : null;
+    } catch {
+      return null;
+    }
+  };
+
+  const [user, setUser] = useState(getStoredUser);
   const [token, setToken] = useState(() => localStorage.getItem('token') || null);
   const [loading, setLoading] = useState(true);
 
@@ -22,8 +28,11 @@ export const AuthProvider = ({ children }) => {
             localStorage.setItem('user', JSON.stringify(res.data));
           }
         } catch (err) {
-          console.error('Failed to restore session:', err);
-          logout();
+          console.error('Session verification notice:', err);
+          // Only logout if 401 unauthorized
+          if (err.toString().includes('401') || err.toString().includes('Not authorized')) {
+            logout();
+          }
         }
       }
       setLoading(false);
@@ -35,12 +44,12 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     const res = await api.post('/auth/login', { email, password });
     if (res.success && res.data) {
-      const { token, user } = res.data;
-      setToken(token);
-      setUser(user);
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(user));
-      return user;
+      const { token: receivedToken, user: receivedUser } = res.data;
+      localStorage.setItem('token', receivedToken);
+      localStorage.setItem('user', JSON.stringify(receivedUser));
+      setToken(receivedToken);
+      setUser(receivedUser);
+      return receivedUser;
     }
     throw new Error(res.message || 'Login failed');
   };
@@ -48,12 +57,12 @@ export const AuthProvider = ({ children }) => {
   const register = async (userData) => {
     const res = await api.post('/auth/register', userData);
     if (res.success && res.data) {
-      const { token, user } = res.data;
-      setToken(token);
-      setUser(user);
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(user));
-      return user;
+      const { token: receivedToken, user: receivedUser } = res.data;
+      localStorage.setItem('token', receivedToken);
+      localStorage.setItem('user', JSON.stringify(receivedUser));
+      setToken(receivedToken);
+      setUser(receivedUser);
+      return receivedUser;
     }
     throw new Error(res.message || 'Registration failed');
   };
@@ -70,13 +79,17 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem('user', JSON.stringify(updatedUser));
   };
 
+  // Immediate fallback to localStorage guarantees no race conditions on navigation
+  const effectiveUser = user || getStoredUser();
+  const effectiveToken = token || localStorage.getItem('token');
+
   return (
     <AuthContext.Provider
       value={{
-        user,
-        token,
-        role: user?.role,
-        isAuthenticated: !!token && !!user,
+        user: effectiveUser,
+        token: effectiveToken,
+        role: effectiveUser?.role,
+        isAuthenticated: !!effectiveToken && !!effectiveUser,
         loading,
         login,
         register,

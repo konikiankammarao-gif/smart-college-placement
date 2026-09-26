@@ -5,10 +5,15 @@ import {
   IconDashboard,
   IconBriefcase,
   IconFileText,
+  IconCalendar,
+  IconMegaphone,
+  IconMessageSquare,
+  IconHelpCircle,
   IconUsers,
   IconBuilding,
   IconBarChart,
   IconAward,
+  IconDownload,
   IconShield,
   IconUser,
   IconLogOut
@@ -65,6 +70,28 @@ const Sidebar = ({ isOpen }) => {
           <span>Applications</span>
         </NavLink>
 
+        <NavLink to="/interviews" className={({ isActive }) => `menu-item ${isActive ? 'active' : ''}`}>
+          <IconCalendar size={18} />
+          <span>Interviews</span>
+        </NavLink>
+
+        {/* Communication & Queries */}
+        <div className="menu-category">Communications</div>
+        <NavLink to="/announcements" className={({ isActive }) => `menu-item ${isActive ? 'active' : ''}`}>
+          <IconMegaphone size={18} />
+          <span>Notice Board</span>
+        </NavLink>
+
+        <NavLink to="/messages" className={({ isActive }) => `menu-item ${isActive ? 'active' : ''}`}>
+          <IconMessageSquare size={18} />
+          <span>Messages</span>
+        </NavLink>
+
+        <NavLink to="/support-tickets" className={({ isActive }) => `menu-item ${isActive ? 'active' : ''}`}>
+          <IconHelpCircle size={18} />
+          <span>Placement Queries</span>
+        </NavLink>
+
         {/* Student Specific */}
         {role === 'STUDENT' && (
           <>
@@ -106,9 +133,14 @@ const Sidebar = ({ isOpen }) => {
               <span>Placed Students</span>
             </NavLink>
 
+            <NavLink to="/reports" className={({ isActive }) => `menu-item ${isActive ? 'active' : ''}`}>
+              <IconDownload size={18} />
+              <span>Reports & CSV Export</span>
+            </NavLink>
+
             <NavLink to="/analytics" className={({ isActive }) => `menu-item ${isActive ? 'active' : ''}`}>
               <IconBarChart size={18} />
-              <span>Analytics & Reports</span>
+              <span>Analytics & Metrics</span>
             </NavLink>
           </>
         )}
@@ -119,7 +151,12 @@ const Sidebar = ({ isOpen }) => {
             <div className="menu-category">Administration</div>
             <NavLink to="/admin-settings" className={({ isActive }) => `menu-item ${isActive ? 'active' : ''}`}>
               <IconShield size={18} />
-              <span>Users & System Logs</span>
+              <span>Users & System Settings</span>
+            </NavLink>
+
+            <NavLink to="/audit-logs" className={({ isActive }) => `menu-item ${isActive ? 'active' : ''}`}>
+              <IconShield size={18} />
+              <span>Audit & Compliance Logs</span>
             </NavLink>
           </>
         )}

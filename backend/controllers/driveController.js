@@ -20,14 +20,40 @@ const createDrive = async (req, res, next) => {
       companyId = company._id;
     } else {
       companyId = req.body.companyId;
-      if (!companyId) return res.status(400).json({ success: false, message: 'Company ID is required' });
+      if (!companyId) {
+        const fallbackComp = await Company.findOne({ approvalStatus: 'APPROVED' }) || await Company.findOne();
+        if (fallbackComp) {
+          companyId = fallbackComp._id;
+        } else {
+          return res.status(400).json({ success: false, message: 'Company ID is required' });
+        }
+      }
     }
 
-    const drive = await PlacementDrive.create({
+    const jobTitle = req.body.jobTitle || req.body.roleTitle;
+    if (!jobTitle) {
+      return res.status(400).json({ success: false, message: 'Job title is required' });
+    }
+
+    const drivePayload = {
       ...req.body,
       companyId,
       createdBy: req.user._id,
-    });
+      jobTitle,
+      jobDescription: req.body.jobDescription || 'Campus placement drive opportunity.',
+      jobType: req.body.jobType || 'Full Time',
+      location: req.body.location || req.body.workLocation || 'Campus',
+      workMode: req.body.workMode || 'On-site',
+      package: req.body.package || {
+        ctc: Number(req.body.packageDetails?.ctc || req.body.ctc || 0),
+        breakup: req.body.packageDetails?.breakup || '',
+      },
+      minimumCGPA: req.body.minimumCGPA ?? req.body.eligibilityCriteria?.minCgpa ?? req.body.minCgpa ?? 0,
+      maximumBacklogs: req.body.maximumBacklogs ?? req.body.eligibilityCriteria?.maxActiveBacklogs ?? req.body.maxBacklogs ?? 0,
+      applicationDeadline: req.body.applicationDeadline || req.body.deadline,
+    };
+
+    const drive = await PlacementDrive.create(drivePayload);
 
     await createAuditLog({
       userId: req.user._id,

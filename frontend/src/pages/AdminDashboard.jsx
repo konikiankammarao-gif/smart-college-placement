@@ -48,12 +48,7 @@ const AdminDashboard = () => {
 
   return (
     <Layout pageTitle="Super Administrator Hub">
-      <div style={{
-        background: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 100%)',
-        borderRadius: '16px',
-        padding: '24px 28px',
-        color: '#ffffff',
-        marginBottom: '28px',
+      <div className="portal-hero-banner" style={{
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',

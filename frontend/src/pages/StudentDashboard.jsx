@@ -48,13 +48,7 @@ const StudentDashboard = () => {
   return (
     <Layout pageTitle="Student Placement Portal">
       {/* Welcome Banner */}
-      <div style={{
-        background: 'linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%)',
-        borderRadius: '16px',
-        padding: '24px 28px',
-        color: '#ffffff',
-        marginBottom: '28px',
-        boxShadow: '0 10px 25px -5px rgba(79, 70, 229, 0.3)',
+      <div className="portal-hero-banner" style={{
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',

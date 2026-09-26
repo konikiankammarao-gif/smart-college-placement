@@ -50,12 +50,7 @@ const OfficerDashboard = () => {
   return (
     <Layout pageTitle="Placement Officer Overview">
       {/* Officer Hero Banner */}
-      <div style={{
-        background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%)',
-        borderRadius: '16px',
-        padding: '24px 28px',
-        color: '#ffffff',
-        marginBottom: '28px',
+      <div className="portal-hero-banner" style={{
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',

@@ -10,6 +10,10 @@ const PlacementDrive = require('../models/PlacementDrive');
 const Application = require('../models/Application');
 const Notification = require('../models/Notification');
 const Placement = require('../models/Placement');
+const Announcement = require('../models/Announcement');
+const SupportTicket = require('../models/SupportTicket');
+const Conversation = require('../models/Conversation');
+const Message = require('../models/Message');
 
 const seed = async () => {
   await connectDB();
@@ -25,6 +29,10 @@ const seed = async () => {
     Application.deleteMany({}),
     Notification.deleteMany({}),
     Placement.deleteMany({}),
+    Announcement.deleteMany({}),
+    SupportTicket.deleteMany({}),
+    Conversation.deleteMany({}),
+    Message.deleteMany({}),
   ]);
   console.log('✅ Cleared existing data');
 
@@ -315,6 +323,76 @@ const seed = async () => {
     },
   ]);
   console.log('✅ Notifications seeded');
+
+  // Sample Announcements
+  await Announcement.insertMany([
+    {
+      title: 'Campus Recruitment Season 2025 Kickoff',
+      content: 'Welcome to the 2025 Campus Placement Season. All graduating students must ensure their profiles, resumes, and CGPAs are fully updated and verified by their department coordinators.',
+      targetType: 'ALL_USERS',
+      priority: 'HIGH',
+      createdBy: officerUser._id,
+    },
+    {
+      title: 'Pre-Placement Technical Assessment by TechCorp',
+      content: 'Shortlisted candidates for TechCorp India are requested to join the virtual coding assessment link by 9:45 AM tomorrow. Keep your college IDs handy.',
+      targetType: 'ALL_STUDENTS',
+      priority: 'URGENT',
+      createdBy: officerUser._id,
+    },
+  ]);
+  console.log('✅ Announcements seeded');
+
+  // Sample Support Ticket
+  const ticket = await SupportTicket.create({
+    subject: 'Request for CGPA correction post semester re-evaluation',
+    description: 'My 6th semester SGPA was recently upgraded from 8.1 to 8.4 after re-evaluation. Requesting profile verification update for upcoming drives.',
+    category: 'PROFILE_VERIFICATION',
+    priority: 'HIGH',
+    createdBy: studentUsers[0]._id,
+    assignedTo: officerUser._id,
+    status: 'IN_PROGRESS',
+    messages: [
+      {
+        senderId: studentUsers[0]._id,
+        message: 'My 6th semester SGPA was recently upgraded from 8.1 to 8.4 after re-evaluation. Requesting profile verification update for upcoming drives.',
+        createdAt: new Date(),
+      },
+      {
+        senderId: officerUser._id,
+        message: 'Thank you Arjun. Please email your updated grade sheet to the placement cell, and we will update your verified score immediately.',
+        createdAt: new Date(),
+      },
+    ],
+  });
+  console.log('✅ Support tickets seeded');
+
+  // Sample Conversation & Message
+  const conversation = await Conversation.create({
+    participants: [studentUsers[0]._id, officerUser._id],
+    conversationType: 'STUDENT_OFFICER',
+    relatedEntity: 'General',
+    lastMessage: {
+      message: 'Sure sir, I will submit the updated grade card tomorrow morning.',
+      senderId: studentUsers[0]._id,
+      createdAt: new Date(),
+    },
+  });
+
+  await Message.create({
+    conversationId: conversation._id,
+    senderId: officerUser._id,
+    receiverId: studentUsers[0]._id,
+    message: 'Hello Arjun, congratulations on being shortlisted for TechCorp India! Please be prepared for round 1.',
+  });
+
+  await Message.create({
+    conversationId: conversation._id,
+    senderId: studentUsers[0]._id,
+    receiverId: officerUser._id,
+    message: 'Sure sir, I will submit the updated grade card tomorrow morning.',
+  });
+  console.log('✅ Internal conversations & messages seeded');
 
   console.log('\n🎉 Database seeded successfully!\n');
   console.log('='.repeat(50));

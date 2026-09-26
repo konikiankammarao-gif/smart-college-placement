@@ -15,13 +15,13 @@ const placementDriveSchema = new mongoose.Schema(
     jobDescription: { type: String, required: true },
     jobType: {
       type: String,
-      enum: ['Full Time', 'Internship', 'Part Time', 'Contract'],
+      enum: ['Full Time', 'Internship', 'Part Time', 'Contract', 'FULL_TIME', 'INTERNSHIP', 'PART_TIME', 'CONTRACT'],
       default: 'Full Time',
     },
     location: { type: String },
     workMode: {
       type: String,
-      enum: ['On-site', 'Remote', 'Hybrid'],
+      enum: ['On-site', 'Remote', 'Hybrid', 'ON_SITE', 'REMOTE', 'HYBRID', 'On-Site'],
       default: 'On-site',
     },
     package: {

@@ -86,7 +86,8 @@ const updateCompanyProfile = async (req, res, next) => {
 // @access  Private (Admin, Officer)
 const updateCompanyApproval = async (req, res, next) => {
   try {
-    const { status, rejectionReason } = req.body;
+    const status = req.body.status || req.body.approvalStatus;
+    const { rejectionReason } = req.body;
 
     if (!['APPROVED', 'REJECTED'].includes(status)) {
       return res.status(400).json({ success: false, message: 'Invalid approval status' });

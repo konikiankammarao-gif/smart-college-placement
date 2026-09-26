@@ -50,8 +50,8 @@ const checkEligibility = (student, drive, departmentId) => {
 
   // Department check
   if (drive.eligibleDepartments && drive.eligibleDepartments.length > 0) {
-    const studentDeptId = student.department ? student.department.toString() : null;
-    const eligibleDeptIds = drive.eligibleDepartments.map((d) => d.toString());
+    const studentDeptId = student.department ? (student.department._id || student.department).toString() : null;
+    const eligibleDeptIds = drive.eligibleDepartments.map((d) => (d._id || d).toString());
     if (studentDeptId && eligibleDeptIds.includes(studentDeptId)) {
       reasons.push(`Department is eligible for this drive`);
     } else {

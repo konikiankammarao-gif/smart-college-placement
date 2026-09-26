@@ -1,9 +1,10 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider, useAuth } from './context/AuthContext';
+import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 
-// Auth Pages
+// Public & Auth Pages
+import Landing from './pages/Landing';
 import Login from './pages/Login';
 import Register from './pages/Register';
 
@@ -16,54 +17,29 @@ import AdminDashboard from './pages/AdminDashboard';
 // Feature Pages
 import Drives from './pages/Drives';
 import Applications from './pages/Applications';
+import Interviews from './pages/Interviews';
+import Announcements from './pages/Announcements';
+import Messages from './pages/Messages';
+import SupportTickets from './pages/SupportTickets';
 import StudentProfile from './pages/StudentProfile';
 import CompanyProfile from './pages/CompanyProfile';
 import StudentsDirectory from './pages/StudentsDirectory';
 import CompaniesDirectory from './pages/CompaniesDirectory';
 import Placements from './pages/Placements';
+import Reports from './pages/Reports';
 import Analytics from './pages/Analytics';
 import AdminSettings from './pages/AdminSettings';
-
-// Helper component to redirect root "/" to user's dashboard
-const RootRedirect = () => {
-  const { user, role, isAuthenticated, loading } = useAuth();
-
-  if (loading) {
-    return (
-      <div style={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center' }}>
-        <p style={{ color: '#64748b' }}>Initializing session...</p>
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
-
-  switch (role) {
-    case 'SUPER_ADMIN':
-      return <Navigate to="/admin-dashboard" replace />;
-    case 'PLACEMENT_OFFICER':
-      return <Navigate to="/officer-dashboard" replace />;
-    case 'COMPANY':
-      return <Navigate to="/company-dashboard" replace />;
-    case 'STUDENT':
-    default:
-      return <Navigate to="/student-dashboard" replace />;
-  }
-};
+import AuditLogs from './pages/AuditLogs';
 
 function App() {
   return (
     <AuthProvider>
       <Router>
         <Routes>
-          {/* Public Auth Routes */}
+          {/* Public Landing & Auth Routes */}
+          <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-
-          {/* Root Redirect */}
-          <Route path="/" element={<RootRedirect />} />
 
           {/* Role Dashboards */}
           <Route
@@ -99,7 +75,7 @@ function App() {
             }
           />
 
-          {/* Feature Routes */}
+          {/* Common & Shared Placement Modules */}
           <Route
             path="/drives"
             element={
@@ -117,6 +93,40 @@ function App() {
             }
           />
           <Route
+            path="/interviews"
+            element={
+              <ProtectedRoute>
+                <Interviews />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/announcements"
+            element={
+              <ProtectedRoute>
+                <Announcements />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/messages"
+            element={
+              <ProtectedRoute>
+                <Messages />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/support-tickets"
+            element={
+              <ProtectedRoute>
+                <SupportTickets />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Student Specific */}
+          <Route
             path="/student-profile"
             element={
               <ProtectedRoute allowedRoles={['STUDENT']}>
@@ -124,6 +134,8 @@ function App() {
               </ProtectedRoute>
             }
           />
+
+          {/* Company Specific */}
           <Route
             path="/company-profile"
             element={
@@ -132,6 +144,8 @@ function App() {
               </ProtectedRoute>
             }
           />
+
+          {/* Directory & Placements */}
           <Route
             path="/students"
             element={
@@ -156,6 +170,16 @@ function App() {
               </ProtectedRoute>
             }
           />
+
+          {/* Reports & Analytics */}
+          <Route
+            path="/reports"
+            element={
+              <ProtectedRoute allowedRoles={['SUPER_ADMIN', 'PLACEMENT_OFFICER']}>
+                <Reports />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/analytics"
             element={
@@ -164,11 +188,21 @@ function App() {
               </ProtectedRoute>
             }
           />
+
+          {/* Admin Administration & Auditing */}
           <Route
             path="/admin-settings"
             element={
               <ProtectedRoute allowedRoles={['SUPER_ADMIN']}>
                 <AdminSettings />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/audit-logs"
+            element={
+              <ProtectedRoute allowedRoles={['SUPER_ADMIN']}>
+                <AuditLogs />
               </ProtectedRoute>
             }
           />

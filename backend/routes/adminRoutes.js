@@ -13,6 +13,7 @@ router.use(protect, authorize('SUPER_ADMIN'));
 router.get('/users', getUsers);
 router.post('/users', createUser);
 router.put('/users/:id', updateUser);
+router.put('/users/:id/status', toggleUserStatus);
 router.put('/users/:id/toggle-status', toggleUserStatus);
 router.delete('/users/:id', deleteUser);
 

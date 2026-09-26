@@ -70,19 +70,28 @@ const Drives = () => {
     try {
       setSubmitLoading(true);
       const payload = {
+        jobTitle: formData.roleTitle,
         roleTitle: formData.roleTitle,
-        jobDescription: formData.jobDescription,
-        jobType: formData.jobType,
-        eligibilityCriteria: {
-          minCgpa: Number(formData.minCgpa),
-          maxActiveBacklogs: Number(formData.maxBacklogs),
-          allowedBranches: ['CSE', 'IT', 'ECE', 'ME', 'EE', 'CE']
+        jobDescription: formData.jobDescription || 'Campus recruitment drive opportunity.',
+        jobType: formData.jobType === 'FULL_TIME' ? 'Full Time' : formData.jobType === 'INTERNSHIP' ? 'Internship' : 'Full Time',
+        package: {
+          ctc: Number(formData.ctc) || 5,
         },
         packageDetails: {
           ctc: Number(formData.ctc) || 5,
         },
-        workLocation: formData.workLocation,
-        deadline: formData.deadline || new Date(Date.now() + 14 * 86400000).toISOString()
+        minimumCGPA: Number(formData.minCgpa),
+        maximumBacklogs: Number(formData.maxBacklogs),
+        eligibilityCriteria: {
+          minCgpa: Number(formData.minCgpa),
+          maxActiveBacklogs: Number(formData.maxBacklogs),
+          allowedBranches: ['CSE', 'IT', 'ECE', 'ME', 'EE', 'CE'],
+        },
+        location: formData.workLocation || 'Campus / Hybrid',
+        workLocation: formData.workLocation || 'Campus / Hybrid',
+        applicationDeadline: formData.deadline || new Date(Date.now() + 14 * 86400000).toISOString(),
+        deadline: formData.deadline || new Date(Date.now() + 14 * 86400000).toISOString(),
+        status: 'OPEN',
       };
 
       const res = await api.post('/drives', payload);
@@ -96,7 +105,7 @@ const Drives = () => {
           maxBacklogs: 0,
           ctc: '',
           workLocation: '',
-          deadline: ''
+          deadline: '',
         });
         setNotificationMsg({ text: 'Placement drive posted successfully!', type: 'success' });
         fetchDrives();
@@ -109,10 +118,13 @@ const Drives = () => {
   };
 
   const filteredDrives = drives.filter((d) => {
-    const matchesSearch = 
-      d.roleTitle?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      d.company?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      d.workLocation?.toLowerCase().includes(searchTerm.toLowerCase());
+    const title = d.jobTitle || d.roleTitle || '';
+    const comp = d.companyId?.companyName || d.company?.name || '';
+    const loc = d.location || d.workLocation || '';
+    const matchesSearch =
+      title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      comp.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      loc.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'ALL' || d.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
@@ -222,14 +234,14 @@ const Drives = () => {
                       fontWeight: '800',
                       fontSize: '16px'
                     }}>
-                      {d.company?.name ? d.company.name.charAt(0).toUpperCase() : 'C'}
+                      {d.companyId?.companyName ? d.companyId.companyName.charAt(0).toUpperCase() : d.company?.name ? d.company.name.charAt(0).toUpperCase() : 'C'}
                     </div>
                     <div>
                       <div style={{ fontWeight: '700', fontSize: '14px', color: '#0f172a' }}>
-                        {d.company?.name || 'Partner Company'}
+                        {d.companyId?.companyName || d.company?.name || 'Partner Company'}
                       </div>
                       <div style={{ fontSize: '12px', color: '#64748b' }}>
-                        {d.workLocation || 'Remote / Hybrid'}
+                        {d.location || d.workLocation || 'Remote / Hybrid'}
                       </div>
                     </div>
                   </div>
@@ -237,7 +249,7 @@ const Drives = () => {
                 </div>
 
                 <h3 style={{ fontSize: '17px', fontWeight: '700', color: '#1e293b', marginBottom: '8px' }}>
-                  {d.roleTitle}
+                  {d.jobTitle || d.roleTitle}
                 </h3>
                 <p style={{ fontSize: '13px', color: '#64748b', lineClamp: 2, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', marginBottom: '16px' }}>
                   {d.jobDescription || 'Exciting opportunity for final year students.'}
@@ -246,10 +258,10 @@ const Drives = () => {
                 {/* Key specs badge row */}
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '18px' }}>
                   <span style={{ fontSize: '12px', background: '#ecfdf5', color: '#065f46', padding: '4px 10px', borderRadius: '6px', fontWeight: '700' }}>
-                    ₹{d.packageDetails?.ctc || 6} LPA
+                    ₹{d.package?.ctc || d.packageDetails?.ctc || 6} LPA
                   </span>
                   <span style={{ fontSize: '12px', background: '#eff6ff', color: '#1e40af', padding: '4px 10px', borderRadius: '6px', fontWeight: '600' }}>
-                    Min CGPA: {d.eligibilityCriteria?.minCgpa || 6.0}
+                    Min CGPA: {d.minimumCGPA ?? d.eligibilityCriteria?.minCgpa ?? 6.0}
                   </span>
                   <span style={{ fontSize: '12px', background: '#f8fafc', color: '#475569', padding: '4px 10px', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
                     {d.jobType?.replace('_', ' ') || 'Full Time'}
@@ -259,7 +271,7 @@ const Drives = () => {
 
               <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: '14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div style={{ fontSize: '11px', color: '#94a3b8' }}>
-                  Deadline: {d.deadline ? new Date(d.deadline).toLocaleDateString() : 'Rolling'}
+                  Deadline: {d.applicationDeadline || d.deadline ? new Date(d.applicationDeadline || d.deadline).toLocaleDateString() : 'Rolling'}
                 </div>
                 {role === 'STUDENT' ? (
                   <button

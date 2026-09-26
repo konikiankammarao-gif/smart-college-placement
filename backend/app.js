@@ -2,7 +2,6 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
-const rateLimit = require('express-rate-limit');
 const path = require('path');
 
 const { errorHandler } = require('./middleware/errorMiddleware');
@@ -19,6 +18,13 @@ const analyticsRoutes = require('./routes/analyticsRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const departmentRoutes = require('./routes/departmentRoutes');
 const placementRoutes = require('./routes/placementRoutes');
+const messageRoutes = require('./routes/messageRoutes');
+const announcementRoutes = require('./routes/announcementRoutes');
+const supportTicketRoutes = require('./routes/supportTicketRoutes');
+const reportRoutes = require('./routes/reportRoutes');
+const { getAuditLogs } = require('./controllers/adminController');
+const { protect } = require('./middleware/authMiddleware');
+const { authorize } = require('./middleware/roleMiddleware');
 
 const app = express();
 
@@ -50,12 +56,6 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
-// Rate limiting for auth routes
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 20,
-  message: { success: false, message: 'Too many requests, please try again later' },
-});
 
 // Body parser
 app.use(express.json({ limit: '10mb' }));
@@ -69,8 +69,13 @@ if (process.env.NODE_ENV === 'development') {
 // Static files for uploads
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+// Health check (Public)
+app.get('/api/health', (req, res) => {
+  res.json({ success: true, message: 'Smart Placement API is running', timestamp: new Date() });
+});
+
 // API Routes
-app.use('/api/auth', authLimiter, authRoutes);
+app.use('/api/auth', authRoutes);
 app.use('/api/students', studentRoutes);
 app.use('/api/companies', companyRoutes);
 app.use('/api/drives', driveRoutes);
@@ -81,11 +86,11 @@ app.use('/api/analytics', analyticsRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/departments', departmentRoutes);
 app.use('/api/placements', placementRoutes);
-
-// Health check
-app.get('/api/health', (req, res) => {
-  res.json({ success: true, message: 'Smart Placement API is running', timestamp: new Date() });
-});
+app.use('/api', messageRoutes);
+app.use('/api/announcements', announcementRoutes);
+app.use('/api/support-tickets', supportTicketRoutes);
+app.use('/api/reports', reportRoutes);
+app.use('/api/audit-logs', protect, authorize('SUPER_ADMIN'), getAuditLogs);
 
 // Serve frontend production build if available
 const frontendDistPath = path.join(__dirname, '../frontend/dist');

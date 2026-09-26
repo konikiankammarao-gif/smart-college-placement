@@ -41,12 +41,7 @@ const CompanyDashboard = () => {
 
   return (
     <Layout pageTitle="Recruiter Dashboard">
-      <div style={{
-        background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
-        borderRadius: '16px',
-        padding: '24px 28px',
-        color: '#ffffff',
-        marginBottom: '28px',
+      <div className="portal-hero-banner" style={{
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',

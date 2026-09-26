@@ -13,7 +13,11 @@ const interviewSchema = new mongoose.Schema(
     roundName: { type: String, required: true },
     roundType: {
       type: String,
-      enum: ['Aptitude Test', 'Coding Test', 'Technical Interview', 'HR Interview', 'Managerial Interview', 'Group Discussion', 'Other'],
+      enum: [
+        'Aptitude Test', 'Coding Test', 'Technical Interview', 'HR Interview', 'Managerial Interview', 'Group Discussion', 'Other',
+        'APTITUDE', 'CODING', 'TECHNICAL', 'HR', 'MANAGERIAL', 'OTHER'
+      ],
+      default: 'Technical Interview',
     },
     scheduledDate: { type: Date },
     scheduledTime: { type: String },

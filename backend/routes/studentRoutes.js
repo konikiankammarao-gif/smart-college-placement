@@ -11,6 +11,7 @@ router.use(protect);
 
 router.get('/stats', authorize('SUPER_ADMIN', 'PLACEMENT_OFFICER'), getStudentStats);
 router.get('/profile', authorize('STUDENT'), getMyProfile);
+router.get('/me', authorize('STUDENT'), getMyProfile);
 router.put('/profile', authorize('STUDENT'), updateProfile);
 router.post('/resume', authorize('STUDENT'), uploadResumeMiddleware.single('resume'), uploadResume);
 router.put('/:id/verify', authorize('SUPER_ADMIN', 'PLACEMENT_OFFICER'), verifyStudent);

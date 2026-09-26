@@ -105,11 +105,44 @@ const getInterviews = async (req, res, next) => {
 // @access  Private (Officer, Company, Admin)
 const updateInterview = async (req, res, next) => {
   try {
-    const interview = await Interview.findById(req.params.id);
+    const interview = await Interview.findById(req.params.id)
+      .populate({ path: 'studentId', populate: { path: 'userId', select: 'name _id' } })
+      .populate({ path: 'driveId', select: 'jobTitle' });
+
     if (!interview) return res.status(404).json({ success: false, message: 'Interview not found' });
 
+    const prevStatus = interview.status;
     Object.assign(interview, req.body);
     await interview.save();
+
+    // If status changed or date rescheduled, notify student
+    if (req.body.status && req.body.status !== prevStatus) {
+      try {
+        const studentUserId = interview.studentId?.userId?._id || interview.studentId?.userId;
+        if (studentUserId) {
+          await createNotification({
+            recipient: studentUserId,
+            title: `Interview Round Update: ${interview.roundName}`,
+            message: `Your interview status for ${interview.roundName} is now ${req.body.status}. Feedback: ${req.body.feedback || 'None'}`,
+            type: 'INTERVIEW_SCHEDULED',
+            relatedId: interview._id,
+            relatedModel: 'Interview',
+          });
+        }
+      } catch (err) {
+        console.error('Interview update notification error:', err.message);
+      }
+    }
+
+    const { createAuditLog } = require('../services/auditService');
+    await createAuditLog({
+      userId: req.user._id,
+      action: `INTERVIEW_${req.body.status || 'UPDATED'}`,
+      entity: 'Interview',
+      entityId: interview._id,
+      description: `Interview round ${interview.roundName} updated to status: ${interview.status}`,
+      req,
+    });
 
     res.json({ success: true, message: 'Interview updated', data: interview });
   } catch (error) {
@@ -118,3 +151,4 @@ const updateInterview = async (req, res, next) => {
 };
 
 module.exports = { createInterview, getInterviews, updateInterview };
+
